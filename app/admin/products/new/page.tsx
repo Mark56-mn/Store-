@@ -7,7 +7,7 @@ import { createClient } from "@/utils/supabase/client";
 import { ImageUploader } from "@/components/ImageUploader";
 
 export default function NewProduct() {
-  const [form, setForm] = useState({ name: "", description: "", selar_link: "", images: [] as string[] });
+  const [form, setForm] = useState({ name: "", description: "", selar_link: "", images: [] as string[], sizes: [] as string[], colors: [] as string[] });
   const [saving, setSaving] = useState(false);
   const router = useRouter();
   const supabase = createClient();
@@ -38,6 +38,14 @@ export default function NewProduct() {
         <div>
           <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Selar Link (Checkout URL)</label>
           <input required type="url" value={form.selar_link} onChange={e => setForm({...form, selar_link: e.target.value})} className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-violet-500/50 transition-colors" />
+        </div>
+        <div>
+          <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Sizes (comma separated)</label>
+          <input type="text" placeholder="S, M, L, XL" value={form.sizes.join(", ")} onChange={e => setForm({...form, sizes: e.target.value.split(",").map(s => s.trim()).filter(Boolean)})} className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-violet-500/50 transition-colors" />
+        </div>
+        <div>
+          <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Colors (comma separated)</label>
+          <input type="text" placeholder="Red, Blue, Black" value={form.colors.join(", ")} onChange={e => setForm({...form, colors: e.target.value.split(",").map(s => s.trim()).filter(Boolean)})} className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-violet-500/50 transition-colors" />
         </div>
         <div className="pt-6 mt-6 border-t border-white/5">
           <button type="submit" disabled={saving} className="bg-white text-slate-900 px-8 py-3 rounded-xl font-bold hover:bg-slate-200 transition-all shadow-xl shadow-white/10">

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { createClient } from "@/utils/supabase/client";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
+import { Share2, Copy, Check, Instagram } from "lucide-react";
 import Reviews from "@/components/Reviews";
 
 import Navbar from "@/components/Navbar";
@@ -14,6 +15,11 @@ export default function PublicProductDetail({ params }: { params: Promise<{ id: 
   const [showModal, setShowModal] = useState(false);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  
+  const [selectedSize, setSelectedSize] = useState("");
+  const [selectedColor, setSelectedColor] = useState("");
+  const [copied, setCopied] = useState(false);
+
   const supabase = createClient();
 
   useEffect(() => {
@@ -36,11 +42,44 @@ export default function PublicProductDetail({ params }: { params: Promise<{ id: 
   }
 
   const handleBuyClick = () => {
+    // If variants exist, require selection
+    if (product.sizes?.length > 0 && !selectedSize) {
+      alert("Please select a size");
+      return;
+    }
+    if (product.colors?.length > 0 && !selectedColor) {
+      alert("Please select a color");
+      return;
+    }
     setShowModal(true);
   };
 
   const proceedToSelar = () => {
-    window.location.href = product.selar_link;
+    try {
+      const url = new URL(product.selar_link);
+      if (selectedSize) url.searchParams.append("size", selectedSize);
+      if (selectedColor) url.searchParams.append("color", selectedColor);
+      window.location.href = url.toString();
+    } catch (e) {
+      // In case selar_link is missing or invalid URL, fallback to raw
+      window.location.href = product.selar_link;
+    }
+  };
+
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(window.location.href);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleWhatsAppShare = () => {
+    const text = encodeURIComponent(`Check out ${product.name}!\n${window.location.href}`);
+    window.open(`https://wa.me/?text=${text}`, "_blank");
+  };
+
+  const handleInstagramShare = () => {
+    handleCopyLink();
+    alert("Link copied! Open Instagram to share with your friends.");
   };
 
   return (
@@ -87,12 +126,60 @@ export default function PublicProductDetail({ params }: { params: Promise<{ id: 
           
           {/* Product Info */}
           <div className="flex flex-col">
-            <div className="inline-block px-3 py-1 bg-violet-500/20 border border-violet-500/30 rounded-full text-violet-300 text-[10px] font-bold uppercase tracking-widest mb-4 w-fit">SKU: {product.id.slice(0,6).toUpperCase()}</div>
+            <div className="flex items-center justify-between mb-4">
+              <div className="inline-block px-3 py-1 bg-violet-500/20 border border-violet-500/30 rounded-full text-violet-300 text-[10px] font-bold uppercase tracking-widest w-fit">SKU: {product.id.slice(0,6).toUpperCase()}</div>
+              
+              <div className="flex items-center gap-2">
+                <button onClick={handleWhatsAppShare} className="w-8 h-8 rounded-full bg-white/5 hover:bg-green-500/20 text-slate-400 hover:text-green-400 flex items-center justify-center transition-colors" title="Share to WhatsApp">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.052 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
+                </button>
+                <button onClick={handleInstagramShare} className="w-8 h-8 rounded-full bg-white/5 hover:bg-pink-500/20 text-slate-400 hover:text-pink-400 flex items-center justify-center transition-colors" title="Share to Instagram">
+                  <Instagram className="w-3.5 h-3.5" />
+                </button>
+                <button onClick={handleCopyLink} className="w-8 h-8 rounded-full bg-white/5 hover:bg-violet-500/20 text-slate-400 hover:text-violet-400 flex items-center justify-center transition-colors" title="Copy Link">
+                  {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                </button>
+              </div>
+            </div>
             <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight mb-6 text-white">{product.name}</h1>
             <div className="prose prose-invert prose-slate mb-8 max-w-none">
               <p className="text-slate-400 leading-relaxed whitespace-pre-wrap">{product.description}</p>
             </div>
             
+            {product.sizes && product.sizes.length > 0 && (
+              <div className="mb-6">
+                <h3 className="text-sm font-bold text-slate-300 uppercase tracking-widest mb-3">Select Size</h3>
+                <div className="flex flex-wrap gap-2">
+                  {product.sizes.map((size: string) => (
+                    <button 
+                      key={size}
+                      onClick={() => setSelectedSize(size)}
+                      className={`px-4 py-2 rounded-lg text-sm font-semibold border transition-all ${selectedSize === size ? 'bg-violet-600 border-violet-500 text-white shadow-lg shadow-violet-500/20' : 'bg-white/5 border-white/10 text-slate-400 hover:bg-white/10 hover:text-white'}`}
+                    >
+                      {size}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+            
+            {product.colors && product.colors.length > 0 && (
+              <div className="mb-6">
+                <h3 className="text-sm font-bold text-slate-300 uppercase tracking-widest mb-3">Select Color</h3>
+                <div className="flex flex-wrap gap-2">
+                  {product.colors.map((color: string) => (
+                    <button 
+                      key={color}
+                      onClick={() => setSelectedColor(color)}
+                      className={`px-4 py-2 rounded-lg text-sm font-semibold border transition-all ${selectedColor === color ? 'bg-violet-600 border-violet-500 text-white shadow-lg shadow-violet-500/20' : 'bg-white/5 border-white/10 text-slate-400 hover:bg-white/10 hover:text-white'}`}
+                    >
+                      {color}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
             <div className="mt-auto pt-8 border-t border-white/10">
               <button 
                 onClick={handleBuyClick}
