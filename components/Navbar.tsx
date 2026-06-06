@@ -50,7 +50,7 @@ export default function Navbar() {
         <div className="w-10 h-10 bg-gradient-to-br from-violet-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-violet-500/20">
           <span className="text-xl font-bold text-white">S</span>
         </div>
-        <span className="text-lg font-semibold tracking-tight text-white">KOSMIC<span className="text-violet-400">STORE</span></span>
+        <span className="text-lg font-semibold tracking-tight text-white">KOSMIC<span className="text-violet-400">STYLE</span></span>
       </Link>
       <nav className="flex items-center gap-6">
         <div className="flex gap-4 text-sm font-medium text-slate-400 hidden sm:flex items-center">

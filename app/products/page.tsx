@@ -25,7 +25,7 @@ export default function PublicProducts() {
     <div className="flex min-h-screen flex-col relative overflow-hidden bg-transparent">
       <Navbar />
       <main className="flex-1 p-6 max-w-7xl mx-auto w-full">
-        <h1 className="text-4xl font-bold tracking-tight mb-12 text-white">All Products</h1>
+        <h1 className="text-4xl font-bold tracking-tight mb-12 text-white">All Collections</h1>
         {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {[1,2,3,4,5,6].map(i => (
