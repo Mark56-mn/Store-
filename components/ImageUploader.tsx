@@ -5,10 +5,12 @@ import { useDropzone } from "react-dropzone";
 import { UploadCloud, X } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
 
-export function ImageUploader({ images, setImages, type = "product-images" }: { images: string[], setImages: (v: string[]) => void, type?: "product-images" | "store-logo" }) {
+export function ImageUploader({ images, setImages, type = "product-images", accept = { 'image/*': [] } }: { images: string[], setImages: (v: string[]) => void, type?: "product-images" | "store-logo" | "product-videos" | "pwa-icons", accept?: any }) {
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
     const supabase = createClient();
     
+    // For React Dropzone batch dropping
+    let currentImages = [...images];
     for (const file of acceptedFiles) {
       const fileExt = file.name.split('.').pop();
       const fileName = `${Math.random()}.${fileExt}`;
@@ -19,13 +21,14 @@ export function ImageUploader({ images, setImages, type = "product-images" }: { 
       if (!uploadError) {
         const { data } = supabase.storage.from(type).getPublicUrl(filePath);
         if (data) {
-          setImages([...images, data.publicUrl]);
+          currentImages.push(data.publicUrl);
         }
       }
     }
+    setImages(currentImages);
   }, [images, setImages, type]);
 
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop, accept: { 'image/*': [] } });
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop, accept });
 
   const removeImage = (index: number) => {
     setImages(images.filter((_, i) => i !== index));
@@ -48,9 +51,15 @@ export function ImageUploader({ images, setImages, type = "product-images" }: { 
 
       {images.length > 0 && (
         <div className="grid grid-cols-4 gap-4">
-          {images.map((url, i) => (
+          {images.map((url, i) => {
+            const isVideo = url.match(/\.(mp4|mov|webm)$/i) || url.includes('product-videos');
+            return (
             <div key={i} className="relative aspect-square rounded-[16px] overflow-hidden border border-white/10 bg-black/20 group">
-              <img src={url} alt="Preview" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
+              {isVideo ? (
+                <video src={url} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" muted loop playsInline />
+              ) : (
+                <img src={url} alt="Preview" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
+              )}
               <button 
                 type="button"
                 onClick={() => removeImage(i)}
@@ -59,7 +68,8 @@ export function ImageUploader({ images, setImages, type = "product-images" }: { 
                 <X className="w-4 h-4" />
               </button>
             </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>

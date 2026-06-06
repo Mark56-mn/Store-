@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { createClient } from "@/utils/supabase/client";
+import { ImageUploader } from "@/components/ImageUploader";
 
 export default function Settings() {
   const [loading, setLoading] = useState(true);
@@ -19,7 +20,11 @@ export default function Settings() {
     tiktok_link: "",
     facebook_link: "",
     instagram_link: "",
-    logo_url: ""
+    logo_url: "",
+    pwa_enabled: true,
+    pwa_icon_url: "",
+    pwa_theme_color: "#0f1117",
+    pwa_background_color: "#0f1117"
   });
 
   const supabase = createClient();
@@ -34,7 +39,8 @@ export default function Settings() {
   }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setSettings(s => ({ ...s, [e.target.name]: e.target.value }));
+    const value = e.target.type === 'checkbox' ? (e.target as HTMLInputElement).checked : e.target.value;
+    setSettings(s => ({ ...s, [e.target.name]: value }));
   };
 
   const handleSave = async (e: React.FormEvent) => {
@@ -44,8 +50,7 @@ export default function Settings() {
 
     const { error } = await supabase
       .from("store_settings")
-      .update({ ...settings, updated_at: new Date().toISOString() })
-      .eq("id", 1);
+      .upsert({ id: 1, ...settings, updated_at: new Date().toISOString() });
 
     if (error) {
       setMessage("Error saving settings.");
@@ -70,6 +75,14 @@ export default function Settings() {
       <form onSubmit={handleSave} className="space-y-6 bg-white/5 border border-white/10 backdrop-blur-sm p-6 rounded-[32px]">
         <div className="space-y-4">
           <h2 className="text-xl font-semibold text-white">General</h2>
+          <div>
+            <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Store Logo</label>
+            <ImageUploader 
+              images={settings.logo_url ? [settings.logo_url] : []} 
+              setImages={(imgs) => setSettings(s => ({ ...s, logo_url: imgs[0] || "" }))} 
+              type="store-logo" 
+            />
+          </div>
           <div>
             <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Store Name</label>
             <input name="store_name" value={settings.store_name || ""} onChange={handleChange} className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-violet-500/50 transition-colors" />
@@ -112,6 +125,34 @@ export default function Settings() {
             <div>
               <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Facebook</label>
               <input name="facebook_link" value={settings.facebook_link || ""} onChange={handleChange} className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-violet-500/50 transition-colors" />
+            </div>
+          </div>
+        </div>
+        
+        <div className="space-y-4 pt-6 border-t border-white/5">
+          <h2 className="text-xl font-semibold text-white">PWA / App Settings</h2>
+          <div>
+            <label className="flex items-center gap-3 cursor-pointer mb-6">
+              <input type="checkbox" name="pwa_enabled" checked={settings.pwa_enabled} onChange={handleChange} className="w-5 h-5 accent-violet-500" />
+              <span className="text-sm font-semibold text-white">Enable PWA Installation Prompt</span>
+            </label>
+          </div>
+          <div>
+            <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">App Icon (PWA)</label>
+            <ImageUploader 
+              images={settings.pwa_icon_url ? [settings.pwa_icon_url] : []} 
+              setImages={(imgs) => setSettings(s => ({ ...s, pwa_icon_url: imgs[0] || "" }))} 
+              type="pwa-icons" 
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Theme Color</label>
+              <input type="color" name="pwa_theme_color" value={settings.pwa_theme_color || "#0f1117"} onChange={handleChange} className="w-full h-12 bg-black/20 border border-white/10 rounded-xl px-2 py-1 focus:outline-none focus:border-violet-500/50 cursor-pointer" />
+            </div>
+            <div>
+              <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Background Color</label>
+              <input type="color" name="pwa_background_color" value={settings.pwa_background_color || "#0f1117"} onChange={handleChange} className="w-full h-12 bg-black/20 border border-white/10 rounded-xl px-2 py-1 focus:outline-none focus:border-violet-500/50 cursor-pointer" />
             </div>
           </div>
         </div>

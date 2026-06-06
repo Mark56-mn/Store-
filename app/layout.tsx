@@ -2,12 +2,14 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
+import { PWAPrompt } from "@/components/PWAPrompt";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Modern Storefront",
   description: "A secure and beautiful storefront.",
+  manifest: "/api/manifest",
 };
 
 export default function RootLayout({
@@ -24,6 +26,7 @@ export default function RootLayout({
         <div className="fixed top-[20%] right-[10%] w-[30vw] h-[30vh] bg-emerald-500/10 rounded-full blur-[100px] pointer-events-none -z-10"></div>
         <ThemeProvider>
           {children}
+          <PWAPrompt />
         </ThemeProvider>
       </body>
     </html>

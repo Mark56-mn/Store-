@@ -1,13 +1,23 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
-
-
-
 import Navbar from "@/components/Navbar";
+import { createClient } from "@/utils/supabase/client";
 
 export default function Storefront() {
+  const [settings, setSettings] = useState<any>(null);
+  const supabase = createClient();
+
+  useEffect(() => {
+    async function load() {
+      const { data } = await supabase.from("store_settings").select("*").eq("id", 1).single();
+      if (data) setSettings(data);
+    }
+    load();
+  }, []);
+
   return (
     <div className="flex min-h-screen flex-col relative overflow-hidden bg-transparent">
       <Navbar />
@@ -20,15 +30,15 @@ export default function Storefront() {
               animate={{ opacity: 1, y: 0 }}
               className="text-5xl md:text-6xl font-extrabold leading-tight mb-4 tracking-tight text-white"
             >
-              Modern <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-violet-500">Elegance</span>
+              {settings?.store_name ? settings.store_name.split(' ')[0] : 'Modern'} <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-violet-500">{settings?.store_name ? settings.store_name.split(' ').slice(1).join(' ') : 'Elegance'}</span>
             </motion.h1>
             <motion.p 
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.2 }}
-              className="text-slate-400 text-sm leading-relaxed mb-6"
+              className="text-slate-400 text-sm leading-relaxed mb-6 whitespace-pre-wrap"
             >
-              Discover premium fashion pieces perfectly crafted for the modern individual. Elevate your everyday style.
+              {settings?.store_description || "Discover premium fashion pieces perfectly crafted for the modern individual. Elevate your everyday style."}
             </motion.p>
             <Link href="/products" className="inline-block px-8 py-3 bg-white text-slate-900 font-bold rounded-full hover:shadow-xl hover:shadow-white/10 transition-all">
               Browse Collection
@@ -46,7 +56,6 @@ export default function Storefront() {
             <Link href="/products" className="text-sm font-medium hover:text-white text-slate-400 transition-colors">View All</Link>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Products grid */}
             {[1, 2, 3].map((i) => (
               <motion.div 
                 key={i} 
@@ -68,12 +77,31 @@ export default function Storefront() {
           </div>
         </section>
       </main>
-      <footer className="h-16 flex items-center justify-center bg-white/5 border-t border-white/5 mt-auto">
-        <p className="text-xs text-slate-500 uppercase tracking-widest flex items-center gap-2">
-          <span className="w-1.5 h-1.5 bg-violet-400 rounded-full"></span>
-          Secured by Selar & Supabase
-          <span className="w-1.5 h-1.5 bg-violet-400 rounded-full"></span>
-        </p>
+      <footer className="py-12 bg-black/50 border-t border-white/5 mt-auto">
+        <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div>
+            <div className="flex flex-col gap-2">
+               <span className="text-lg font-semibold tracking-tight text-white mb-2 uppercase break-all">{settings?.store_name || "KOSMIC"}</span>
+               <p className="text-slate-400 text-sm max-w-xs">{settings?.store_description || "Premium fashion."}</p>
+            </div>
+          </div>
+          <div>
+            <h4 className="text-white font-bold mb-4 uppercase text-sm tracking-widest">Connect</h4>
+            <div className="flex flex-col gap-3 text-sm text-slate-400">
+              {settings?.instagram_link && <a href={settings.instagram_link} target="_blank" rel="noreferrer" className="hover:text-white transition-colors">Instagram</a>}
+              {settings?.tiktok_link && <a href={settings.tiktok_link} target="_blank" rel="noreferrer" className="hover:text-white transition-colors">TikTok</a>}
+              {settings?.whatsapp_link && <a href={settings.whatsapp_link} target="_blank" rel="noreferrer" className="hover:text-white transition-colors">WhatsApp</a>}
+              {settings?.facebook_link && <a href={settings.facebook_link} target="_blank" rel="noreferrer" className="hover:text-white transition-colors">Facebook</a>}
+            </div>
+          </div>
+          <div>
+             <h4 className="text-white font-bold mb-4 uppercase text-sm tracking-widest">Contact</h4>
+             <div className="flex flex-col gap-3 text-sm text-slate-400">
+               {settings?.contact_email && <span>{settings.contact_email}</span>}
+               {settings?.contact_phone && <span>{settings.contact_phone}</span>}
+             </div>
+          </div>
+        </div>
       </footer>
     </div>
   );

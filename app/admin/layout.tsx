@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { LogOut, Package, Settings, LayoutDashboard, MessageSquare, Menu, X } from "lucide-react";
+import { LogOut, Package, Settings, LayoutDashboard, MessageSquare, Menu, X, Video } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
 import { useState } from "react";
 
@@ -24,6 +24,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const nav = [
     { name: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
     { name: "Products", href: "/admin/products", icon: Package },
+    { name: "External Videos", href: "/admin/videos", icon: Video },
     { name: "Reviews", href: "/admin/reviews", icon: MessageSquare },
     { name: "Settings", href: "/admin/settings", icon: Settings },
   ];

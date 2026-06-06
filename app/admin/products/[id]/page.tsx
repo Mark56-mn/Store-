@@ -6,8 +6,8 @@ import { createClient } from "@/utils/supabase/client";
 
 import { ImageUploader } from "@/components/ImageUploader";
 
-export default function EditProduct({ params }: { params: { id: string } }) {
-  const [form, setForm] = useState({ name: "", description: "", selar_link: "", images: [] as string[], sizes: [] as string[], colors: [] as string[] });
+export default function EditProduct({ params }: { params: Promise<{ id: string }> }) {
+  const [form, setForm] = useState({ name: "", description: "", selar_link: "", images: [] as string[], videos: [] as string[], sizes: [] as string[], colors: [] as string[] });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const router = useRouter();
@@ -24,7 +24,7 @@ export default function EditProduct({ params }: { params: { id: string } }) {
 
   async function load(productId: string) {
     const { data } = await supabase.from("products").select("*").eq("id", productId).single();
-    if (data) setForm({ ...data, images: data.images || [], sizes: data.sizes || [], colors: data.colors || [] });
+    if (data) setForm({ ...data, images: data.images || [], videos: data.videos || [], sizes: data.sizes || [], colors: data.colors || [] });
     setLoading(false);
   }
 
@@ -44,7 +44,11 @@ export default function EditProduct({ params }: { params: { id: string } }) {
       <form onSubmit={handleSave} className="space-y-6 bg-white/5 border border-white/10 backdrop-blur-sm p-6 rounded-[32px]">
         <div>
           <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Product Images</label>
-          <ImageUploader images={form.images} setImages={img => setForm({...form, images: img})} />
+          <ImageUploader images={form.images} setImages={img => setForm({...form, images: img})} type="product-images" accept={{ 'image/*': [] }} />
+        </div>
+        <div>
+          <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Product Videos</label>
+          <ImageUploader images={form.videos} setImages={vid => setForm({...form, videos: vid})} type="product-videos" accept={{ 'video/*': [] }} />
         </div>
         <div>
           <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Product Name</label>

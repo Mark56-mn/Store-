@@ -56,6 +56,7 @@ export default function Navbar() {
         <div className="flex gap-4 text-sm font-medium text-slate-400 hidden sm:flex items-center">
           <Link href="/" className="hover:text-white transition-colors">Storefront</Link>
           <Link href="/products" className="hover:text-white transition-colors">Products</Link>
+          <Link href="/for-you" className="hover:text-white transition-colors">For You</Link>
         </div>
         <div className="h-8 w-[1px] bg-white/10 hidden sm:block"></div>
         {user ? (

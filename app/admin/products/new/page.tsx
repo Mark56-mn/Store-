@@ -7,7 +7,7 @@ import { createClient } from "@/utils/supabase/client";
 import { ImageUploader } from "@/components/ImageUploader";
 
 export default function NewProduct() {
-  const [form, setForm] = useState({ name: "", description: "", selar_link: "", images: [] as string[], sizes: [] as string[], colors: [] as string[] });
+  const [form, setForm] = useState({ name: "", description: "", selar_link: "", images: [] as string[], videos: [] as string[], sizes: [] as string[], colors: [] as string[] });
   const [saving, setSaving] = useState(false);
   const router = useRouter();
   const supabase = createClient();
@@ -25,7 +25,11 @@ export default function NewProduct() {
       <form onSubmit={handleSave} className="space-y-6 bg-white/5 border border-white/10 backdrop-blur-sm p-6 rounded-[32px]">
         <div>
           <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Product Images</label>
-          <ImageUploader images={form.images} setImages={img => setForm({...form, images: img})} />
+          <ImageUploader images={form.images} setImages={img => setForm({...form, images: img})} type="product-images" accept={{ 'image/*': [] }} />
+        </div>
+        <div>
+          <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Product Videos</label>
+          <ImageUploader images={form.videos} setImages={vid => setForm({...form, videos: vid})} type="product-videos" accept={{ 'video/*': [] }} />
         </div>
         <div>
           <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Product Name</label>
