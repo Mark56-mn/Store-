@@ -5,31 +5,54 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
 import { motion } from "framer-motion";
 
-export default function AdminLogin() {
+export default function Login() {
+  const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError("");
 
     const supabase = createClient();
-    const { error: authError } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    
+    let result;
+    if (isSignUp) {
+      result = await supabase.auth.signUp({
+        email,
+        password,
+      });
+    } else {
+      result = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+    }
 
-    if (authError) {
-      setError(authError.message);
+    if (result.error) {
+      setError(result.error.message);
       setLoading(false);
       return;
     }
 
-    router.push("/admin/dashboard");
+    if (isSignUp) {
+      setError("Success! Please sign in now.");
+      setIsSignUp(false);
+      setLoading(false);
+      return;
+    }
+
+    // Attempt to redirect to appropriate place based on role
+    const { data } = await supabase.from("profiles").select("role").eq("id", result.data.user.id).single();
+    if (data?.role === 'admin') {
+      router.push("/admin/dashboard");
+    } else {
+      router.push("/");
+    }
     router.refresh();
   };
 
@@ -48,15 +71,15 @@ export default function AdminLogin() {
           <div className="w-12 h-12 bg-gradient-to-br from-violet-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-violet-500/20 mb-4">
             <span className="text-2xl font-bold text-white">S</span>
           </div>
-          <h1 className="text-2xl font-bold tracking-tight text-white mb-2">Admin Login</h1>
-          <p className="text-sm font-medium text-slate-400">Welcome back. Authenticate to continue.</p>
+          <h1 className="text-2xl font-bold tracking-tight text-white mb-2">{isSignUp ? "Create an Account" : "Welcome Back"}</h1>
+          <p className="text-sm font-medium text-slate-400">{isSignUp ? "Sign up to start reviewing products." : "Authenticate to continue."}</p>
         </div>
         {error && (
-          <div className="bg-red-500/10 border border-red-500/20 text-red-400 p-3 rounded-lg text-sm mb-4">
+          <div className={error.startsWith('Success') ? "bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 p-3 rounded-lg text-sm mb-4" : "bg-red-500/10 border border-red-500/20 text-red-400 p-3 rounded-lg text-sm mb-4"}>
             {error}
           </div>
         )}
-        <form onSubmit={handleLogin} className="space-y-4">
+        <form onSubmit={handleAuth} className="space-y-4">
           <div>
             <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Email</label>
             <input 
@@ -82,9 +105,17 @@ export default function AdminLogin() {
             disabled={loading}
             className="w-full bg-white text-slate-900 font-bold rounded-xl py-3.5 mt-4 hover:shadow-xl hover:shadow-white/10 transition-all disabled:opacity-50 text-[15px]"
           >
-            {loading ? "Signing in..." : "Sign In"}
+            {loading ? (isSignUp ? "Signing up..." : "Signing in...") : (isSignUp ? "Sign Up" : "Sign In")}
           </button>
         </form>
+        <div className="mt-6 text-center">
+          <button 
+            onClick={() => setIsSignUp(!isSignUp)}
+            className="text-sm text-slate-400 hover:text-white transition-colors"
+          >
+            {isSignUp ? "Already have an account? Sign in" : "Need an account? Sign up"}
+          </button>
+        </div>
       </motion.div>
     </div>
   );

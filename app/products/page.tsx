@@ -5,6 +5,8 @@ import { createClient } from "@/utils/supabase/client";
 import Link from "next/link";
 import { motion } from "framer-motion";
 
+import Navbar from "@/components/Navbar";
+
 export default function PublicProducts() {
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -21,25 +23,7 @@ export default function PublicProducts() {
 
   return (
     <div className="flex min-h-screen flex-col relative overflow-hidden bg-transparent">
-      <header className="sticky top-0 z-50 w-full h-16 flex items-center justify-between px-8 bg-white/5 backdrop-blur-md border-b border-white/10">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-gradient-to-br from-violet-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-violet-500/20">
-            <span className="text-xl font-bold text-white">S</span>
-          </div>
-          <Link href="/" className="text-lg font-semibold tracking-tight text-white">KOSMIC<span className="text-violet-400">STORE</span></Link>
-        </div>
-        <nav className="flex items-center gap-6">
-          <div className="flex gap-4 text-sm font-medium text-slate-400 hidden sm:flex">
-            <Link href="/" className="hover:text-white transition-colors">Storefront</Link>
-            <Link href="/products" className="text-white">Products</Link>
-          </div>
-          <div className="h-8 w-[1px] bg-white/10 hidden sm:block"></div>
-          <Link href="/admin/login" className="flex items-center gap-3 bg-white/10 hover:bg-white/20 transition-all px-4 py-2 rounded-full cursor-pointer">
-            <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-100">Admin Mode</span>
-          </Link>
-        </nav>
-      </header>
+      <Navbar />
       <main className="flex-1 p-6 max-w-7xl mx-auto w-full">
         <h1 className="text-4xl font-bold tracking-tight mb-12 text-white">All Products</h1>
         {loading ? (
