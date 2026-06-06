@@ -9,8 +9,8 @@ export async function middleware(request: NextRequest) {
   })
 
   const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    process.env.NEXT_PUBLIC_SUPABASE_URL || "https://placeholder-project.supabase.co",
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "placeholder-anon-key",
     {
       cookies: {
         getAll() {
@@ -29,12 +29,17 @@ export async function middleware(request: NextRequest) {
     }
   )
 
+  const isAuthRoute = request.nextUrl.pathname.startsWith("/admin/login")
+  const isAdminRoute = request.nextUrl.pathname.startsWith("/admin") && !isAuthRoute
+
+  // Only check auth if we are doing admin stuff to save rate-limit and 403 errors
+  if (!isAuthRoute && !isAdminRoute) {
+    return supabaseResponse;
+  }
+
   const {
     data: { user },
   } = await supabase.auth.getUser()
-
-  const isAuthRoute = request.nextUrl.pathname.startsWith("/admin/login")
-  const isAdminRoute = request.nextUrl.pathname.startsWith("/admin") && !isAuthRoute
 
   // If user is trying to access admin dashboard
   if (isAdminRoute) {
