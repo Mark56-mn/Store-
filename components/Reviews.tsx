@@ -31,9 +31,8 @@ export default function Reviews({ productId }: { productId: string }) {
     const { data: { session } } = await supabase.auth.getSession();
     setUser(session?.user || null);
     if (session?.user) {
-      // Check if admin
-      const { data } = await supabase.from("admins").select("id").eq("user_id", session.user.id).single();
-      if (data) setIsAdmin(true);
+      const { data } = await supabase.from("profiles").select("role").eq("id", session.user.id).single();
+      if (data && data.role === "admin") setIsAdmin(true);
     }
   }
 

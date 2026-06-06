@@ -10,6 +10,8 @@ export default function PublicProductDetail({ params }: { params: Promise<{ id: 
   const [product, setProduct] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const supabase = createClient();
 
   useEffect(() => {
@@ -68,7 +70,12 @@ export default function PublicProductDetail({ params }: { params: Promise<{ id: 
             <div className="aspect-square bg-gradient-to-tr from-slate-900 to-slate-800 border border-white/10 rounded-[32px] overflow-hidden relative flex items-center justify-center p-2 backdrop-blur-2xl">
               <div className="w-full h-full rounded-[24px] overflow-hidden relative">
                 {product.images && product.images.length > 0 ? (
-                  <img src={product.images[0]} alt={product.name} className="absolute inset-0 w-full h-full object-cover" />
+                  <img 
+                    src={product.images[0]} 
+                    alt={product.name} 
+                    className="absolute inset-0 w-full h-full object-cover cursor-zoom-in hover:scale-105 transition-transform duration-500" 
+                    onClick={() => { setCurrentImageIndex(0); setLightboxOpen(true); }}
+                  />
                 ) : (
                   <span className="text-slate-600 absolute inset-0 flex items-center justify-center">No Image Available</span>
                 )}
@@ -81,7 +88,12 @@ export default function PublicProductDetail({ params }: { params: Promise<{ id: 
                 {product.images.slice(1).map((img: string, i: number) => (
                   <div key={i} className="aspect-square bg-white/5 border border-white/10 rounded-2xl overflow-hidden backdrop-blur-sm p-1">
                     <div className="w-full h-full rounded-xl overflow-hidden relative">
-                      <img src={img} alt={`${product.name} ${i+2}`} className="absolute inset-0 w-full h-full object-cover" />
+                      <img 
+                        src={img} 
+                        alt={`${product.name} ${i+2}`} 
+                        className="absolute inset-0 w-full h-full object-cover cursor-zoom-in hover:scale-105 transition-transform duration-500"
+                        onClick={() => { setCurrentImageIndex(i + 1); setLightboxOpen(true); }}
+                      />
                     </div>
                   </div>
                 ))}
@@ -119,6 +131,60 @@ export default function PublicProductDetail({ params }: { params: Promise<{ id: 
           <span className="w-1.5 h-1.5 bg-violet-400 rounded-full"></span>
         </p>
       </footer>
+
+      <AnimatePresence>
+        {lightboxOpen && product?.images && (
+          <div className="fixed inset-0 z-[200] flex items-center justify-center bg-[#020617]/95 backdrop-blur-xl">
+            <button 
+              className="absolute top-6 right-6 text-white/50 hover:text-white p-2 transition-colors z-[210] bg-white/5 hover:bg-white/10 rounded-full"
+              onClick={() => setLightboxOpen(false)}
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+            </button>
+            
+            {product.images.length > 1 && (
+              <>
+                <button 
+                  className="absolute left-6 top-1/2 -translate-y-1/2 text-white/50 hover:text-white p-3 transition-colors z-[210] bg-white/5 hover:bg-white/10 rounded-full"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setCurrentImageIndex((prev) => (prev > 0 ? prev - 1 : product.images.length - 1));
+                  }}
+                >
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+                </button>
+                <button 
+                  className="absolute right-6 top-1/2 -translate-y-1/2 text-white/50 hover:text-white p-3 transition-colors z-[210] bg-white/5 hover:bg-white/10 rounded-full"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setCurrentImageIndex((prev) => (prev < product.images.length - 1 ? prev + 1 : 0));
+                  }}
+                >
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+                </button>
+              </>
+            )}
+
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              className="relative w-full max-w-5xl max-h-[85vh] p-4 flex items-center justify-center outline-none"
+              onClick={() => setLightboxOpen(false)}
+            >
+              <img 
+                src={product.images[currentImageIndex]} 
+                alt={`${product.name} - View ${currentImageIndex + 1}`}
+                className="max-w-full max-h-[85vh] object-contain rounded-xl shadow-2xl"
+                onClick={(e) => e.stopPropagation()}
+              />
+              <div className="absolute bottom-[-30px] left-1/2 -translate-x-1/2 text-slate-400 text-sm font-medium tracking-widest uppercase">
+                {currentImageIndex + 1} / {product.images.length}
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
       <AnimatePresence>
         {showModal && (
